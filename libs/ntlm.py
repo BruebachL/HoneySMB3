@@ -4,6 +4,8 @@
 # of the Apache Software License. See the accompanying LICENSE file
 # for more information.
 #
+from __future__ import absolute_import
+from __future__ import print_function
 import base64
 import struct
 import calendar
@@ -13,8 +15,10 @@ import random
 import string
 import binascii
 
-from structure import Structure
+from .structure import Structure
 import logging
+import six
+from six.moves import range
 
 LOG = logging.getLogger(__name__)
 
@@ -211,7 +215,7 @@ class AV_PAIRS:
         self.fields[key] = (len(value),value)
 
     def __getitem__(self, key):
-        if self.fields.has_key(key):
+        if key in self.fields:
            return self.fields[key]
         return None
 
@@ -238,10 +242,10 @@ class AV_PAIRS:
 
     def dump(self):
         for i in self.fields.keys():
-            print "%s: {%r}" % (i,self[i])
+            print("%s: {%r}" % (i,self[i]))
 
     def getData(self):
-        if self.fields.has_key(NTLMSSP_AV_EOL):
+        if NTLMSSP_AV_EOL in self.fields:
             del self.fields[NTLMSSP_AV_EOL]
         ans = ''
         for i in self.fields.keys():
@@ -572,11 +576,15 @@ def getNTLMSSPType1(workstation='', domain='', signingRequired = False, use_ntlm
     if encoding is not None:
         try:
             workstation.encode('utf-16le')
-        except:
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
             workstation = workstation.decode(encoding)
         try:
             domain.encode('utf-16le')
-        except:
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
             domain = domain.decode(encoding)
 
     # Let's prepare a Type 1 NTLMSSP Message
@@ -609,15 +617,21 @@ def getNTLMSSPType3(type1, type2, user, password, domain, lmhash = '', nthash = 
     if encoding is not None:
         try:
             user.encode('utf-16le')
-        except:
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
             user = user.decode(encoding)
         try:
             password.encode('utf-16le')
-        except:
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
             password = password.decode(encoding)
         try:
             domain.encode('utf-16le')
-        except:
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
             domain = user.decode(encoding)
 
     ntlmChallenge = NTLMAuthChallenge(type2)
@@ -629,7 +643,7 @@ def getNTLMSSPType3(type1, type2, user, password, domain, lmhash = '', nthash = 
     # method we will create a valid ChallengeResponse
     ntlmChallengeResponse = NTLMAuthChallengeResponse(user, password, ntlmChallenge['challenge'])
 
-    clientChallenge = "".join([random.choice(string.digits+string.letters) for _ in xrange(8)])
+    clientChallenge = "".join([random.choice(string.digits+string.letters) for _ in range(8)])
 
     serverName = ntlmChallenge['TargetInfoFields']
 
@@ -668,7 +682,7 @@ def getNTLMSSPType3(type1, type2, user, password, domain, lmhash = '', nthash = 
     if ntlmChallenge['flags'] & NTLMSSP_NEGOTIATE_KEY_EXCH:
        # not exactly what I call random tho :\
        # exportedSessionKey = this is the key we should use to sign
-       exportedSessionKey = "".join([random.choice(string.digits+string.letters) for _ in xrange(16)])
+       exportedSessionKey = "".join([random.choice(string.digits+string.letters) for _ in range(16)])
        #exportedSessionKey = "A"*16
        #print "keyExchangeKey %r" % keyExchangeKey
        # Let's generate the right session key based on the challenge flags
@@ -764,7 +778,7 @@ def LMOWFv1(password, lmhash = '', nthash=''):
 def compute_nthash(password):
     # This is done according to Samba's encryption specification (docs/html/ENCRYPTION.html)
     try:
-        password = unicode(password).encode('utf_16le')
+        password = six.text_type(password).encode('utf_16le')
     except UnicodeDecodeError:
         import sys
         password = password.decode(sys.getfilesystemencoding()).encode('utf_16le')

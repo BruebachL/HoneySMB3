@@ -10,7 +10,8 @@
 #   SMB 2 and 3 Protocol Structures and constants [MS-SMB2]
 #
 
-from structure import Structure
+from __future__ import absolute_import
+from .structure import Structure
 
 # Constants
 
@@ -426,7 +427,7 @@ class SMBPacketBase(Structure):
 
     def isValidAnswer(self, status):
         if self['Status'] != status:
-            import smb3
+            from . import smb3
             raise smb3.SessionError(self['Status'], self)
         return True
 

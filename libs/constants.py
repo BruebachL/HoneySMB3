@@ -1,4 +1,6 @@
+from __future__ import absolute_import
 from enum import Enum
+from six.moves import range
 
 def encodeFlags(flags):
     finalFlags = list()

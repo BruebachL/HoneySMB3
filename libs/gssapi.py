@@ -12,13 +12,14 @@
 #   RFC 4121 Partial Implementation
 #   RFC 3962 Partial Implementation
 
+from __future__ import absolute_import
 import struct
 
 from Crypto.Hash import HMAC, MD5
 from Crypto.Cipher import ARC4
 
-from structure import Structure
-import constants, crypto
+from .structure import Structure
+from . import constants, crypto
 
 
 # Constants

@@ -1,19 +1,22 @@
+from __future__ import absolute_import
+from __future__ import print_function
 from libs.smbserver import SMBSERVER
 from binascii import unhexlify
-import ConfigParser
+import six.moves.configparser
 import sys
 
 
 class SimpleSMBServer:
     def __init__(self, listenAddress='0.0.0.0', listenPort=445, configFile=None):
         if configFile == None:
-            print "[*] Config File Required"
+            print("[*] Config File Required")
             sys.exit(0)
         self.__smbConfig = configFile
         self.__server = SMBSERVER((listenAddress, listenPort), config_parser=self.__smbConfig)
         self.__server.processConfigFile()
 
     def start(self):
+        print("Starting server...")
         self.__server.serve_forever()
 
     def registerNamedPipe(self, pipeName, address):
@@ -65,12 +68,12 @@ class SimpleSMBServer:
 
 
 def main():
-    smbConfig = ConfigParser.RawConfigParser()
-    smbConfig.read('/home/smb/smb.conf')
+    smbConfig = six.moves.configparser.RawConfigParser()
+    smbConfig.read('smb.conf')
     smbServer = SimpleSMBServer(configFile=smbConfig)
 
-    shareConfig = ConfigParser.RawConfigParser()
-    shareConfig.read("/home/smb/shares.conf")
+    shareConfig = six.moves.configparser.RawConfigParser()
+    shareConfig.read("shares.conf")
 
     shareNames = [i.strip() for i in shareConfig.get('shareNames', 'share_names').split(',')]
     for shareName in shareNames:
@@ -80,7 +83,7 @@ def main():
         path = shareConfig.get(shareName, 'path')
         smbServer.addShare(shareName=shareName, sharePath=path, shareComment=comment, shareType=shareType,
                            readOnly=readOnly)
-        smbServer.setSMB2Support(True);
+        smbServer.setSMB2Support(True)
 
     smbServer.start()
 
